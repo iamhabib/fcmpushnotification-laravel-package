@@ -1,0 +1,26 @@
+{
+    "name": "hrhabib/fcm-push-notification",
+    "description": "A library for sending firebase push notification",
+    "type": "Library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Habibur Rahman",
+            "email": "md.hr_habib@yahoo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+	"autoload": {
+		"psr-4": {
+			"FcmPushNotification\\FcmPushNotification\\": "src/"
+		}
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"FcmPushNotification\\FcmPushNotification\\FcmPushNotificationServiceProvider"
+			]
+		}
+	}
+}
