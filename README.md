@@ -8,6 +8,10 @@ Utility class to send push notifications using firebase FCM.
 composer require hrhabib/fcm-push-notification
 ```
 
+```
+php artisan vendor:publish --tag=fcm-push-notification-config
+```
+
 Update firebase push key in config/fcm_push_notification.php
 
 ### Usage
