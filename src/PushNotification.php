@@ -6,9 +6,9 @@ use Log;
 class PushNotification {
 
     private $push_key = '';
-    private $ttl = 10;
+    private $ttl = 2419200;
 
-    public function __construct($ttl = 10){
+    public function __construct($ttl = 2419200){
         $this->push_key = config('fcm_push_notification.fcm_push_app_key');
         $this->ttl = $ttl;
     }
