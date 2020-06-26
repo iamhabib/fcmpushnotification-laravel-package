@@ -1,13 +1,16 @@
 <?php
 
 namespace FcmPushNotification\FcmPushNotification;
+use Log;
 
 class PushNotification {
 
     private $push_key = '';
+    private $ttl = 10;
 
-    public function __construct(){
+    public function __construct($ttl = 10){
         $this->push_key = config('fcm_push_notification.fcm_push_app_key');
+        $this->ttl = $ttl;
     }
 
     // sending push message to single user by firebase reg id
@@ -15,12 +18,14 @@ class PushNotification {
         try{
 			$fields = array(
 				'to' => $to,
-				'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'time_to_live' => $this->ttl
 			);
 			return $this->sendPushNotification($fields);
 		}catch(\Exception $ex){
-			return $ex->getMessage();
-		}
+			Log::error('Push Notification Issue at sendToOne: '.$ex->getMessage());
+        }
+        return false;
     }
 
     // Sending message to a topic by topic name
@@ -28,12 +33,14 @@ class PushNotification {
         try{
 			$fields = array(
 				'to' => '/topics/' . $to,
-				'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'time_to_live' => $this->ttl
 			);
 			return $this->sendPushNotification($fields);
 		}catch(\Exception $ex){
-			return $ex->getMessage();
-		}
+			Log::error('Push Notification Issue at sendToTopic: '.$ex->getMessage());
+        }
+        return false;
     }
 
     // Sending message to a topic by topic global
@@ -41,29 +48,34 @@ class PushNotification {
         try{
 			$fields = array(
 				'to' => '/topics/global',
-				'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                'time_to_live' => $this->ttl
 			);
 			return $this->sendPushNotification($fields);
 		}catch(\Exception $ex){
-			return $ex->getMessage();
-		}
+			Log::error('Push Notification Issue at sendToAll: '.$ex->getMessage());
+        }
+        return false;
     }
 
     // sending push message to multiple users by firebase registration ids
     public function sendMultiple($registration_ids, $title, $message, $image = '', $background = false, $data = null) {
         try{
+            $res = [];
 			$collection = array_chunk($registration_ids, 1000);
 			foreach ($collection as $chunk){
 				$fields = array(
 					'registration_ids' => $chunk,
-					'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                    'data' => $this->getPushMessageJson($title, $message, $image, $background, $data),
+                    'time_to_live' => $this->ttl
 				);
-				$this->sendPushNotification($fields);
+				$res[] = $this->sendPushNotification($fields);
 			}
-			return 'done';
+			return $res;
 		}catch(\Exception $ex){
-			return $ex->getMessage();
-		}
+			Log::error('Push Notification Issue at sendMultiple: '.$ex->getMessage());
+        }
+        return false;
     }
 
     // function makes curl request to firebase servers
@@ -100,7 +112,7 @@ class PushNotification {
         // Close connection
         curl_close($ch);
 
-        return $result;
+        return json_decode($result);
     }
 
     private function getPushMessageJson($title, $message, $image, $background, $data) {
