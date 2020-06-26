@@ -112,7 +112,7 @@ class PushNotification {
         // Close connection
         curl_close($ch);
 
-        return json_decode($result);
+        return $result;
     }
 
     private function getPushMessageJson($title, $message, $image, $background, $data) {
